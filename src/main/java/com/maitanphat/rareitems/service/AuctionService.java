@@ -49,13 +49,18 @@ public class AuctionService {
 
     public RareItem createItem(CreateItemRequest request) {
         Long itemId = itemIdSequence.incrementAndGet();
+        String normalizedName = normalizeText(request.name(), "Unnamed item");
+        String normalizedCategory = normalizeText(request.category(), "Uncategorized");
+        String normalizedDescription = normalizeText(request.description(), "No description.");
+        String normalizedImageUrl = normalizeImageUrl(request.imageUrl(), defaultImageByCategory(normalizedCategory));
         BigDecimal startingPrice = normalizeMoney(request.startingPrice());
 
         RareItem item = new RareItem(
                 itemId,
-                normalizeText(request.name(), "Unnamed item"),
-                normalizeText(request.category(), "Uncategorized"),
-                normalizeText(request.description(), "No description."),
+                normalizedName,
+                normalizedCategory,
+                normalizedDescription,
+                normalizedImageUrl,
                 startingPrice,
                 startingPrice,
                 AuctionStatus.OPEN,
@@ -118,6 +123,7 @@ public class AuctionService {
                 "Vintage Mechanical Watch",
                 "Watch",
                 "Swiss watch from the 1970s in very good condition.",
+                "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1200&q=80",
                 new BigDecimal("5000000")
         ));
 
@@ -125,6 +131,7 @@ public class AuctionService {
                 "Porcelain Tea Set",
                 "Ceramic",
                 "Hand-painted collectible tea set with original box.",
+                "https://images.unsplash.com/photo-1612196808214-b7e239e5f6f1?auto=format&fit=crop&w=1200&q=80",
                 new BigDecimal("2500000")
         ));
     }
@@ -138,5 +145,26 @@ public class AuctionService {
             return fallback;
         }
         return value.trim();
+    }
+
+    private String normalizeImageUrl(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        return value.trim();
+    }
+
+    private String defaultImageByCategory(String category) {
+        String normalized = category.toLowerCase();
+        if (normalized.contains("watch") || normalized.contains("dong ho")) {
+            return "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=1200&q=80";
+        }
+        if (normalized.contains("coin") || normalized.contains("tien")) {
+            return "https://images.unsplash.com/photo-1610375461369-d613b56438b6?auto=format&fit=crop&w=1200&q=80";
+        }
+        if (normalized.contains("art") || normalized.contains("tranh")) {
+            return "https://images.unsplash.com/photo-1577083288073-40892c0860a4?auto=format&fit=crop&w=1200&q=80";
+        }
+        return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80";
     }
 }

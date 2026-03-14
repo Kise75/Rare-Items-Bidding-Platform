@@ -17,6 +17,9 @@ public record CreateItemRequest(
         @Size(max = 300, message = "Description must be at most 300 characters.")
         String description,
 
+        @Size(max = 500, message = "Image URL must be at most 500 characters.")
+        String imageUrl,
+
         @NotNull(message = "Starting price is required.")
         @DecimalMin(value = "0.01", message = "Starting price must be greater than 0.")
         BigDecimal startingPrice

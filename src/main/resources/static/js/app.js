@@ -1,8 +1,12 @@
 ﻿const state = {
     items: [],
     filteredItems: [],
-    selectedItemId: null
+    selectedItemId: null,
+    currentUser: null
 };
+
+const SESSION_KEY = "rarebid_current_user";
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80";
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -14,6 +18,7 @@ let toastTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     wireEvents();
+    initAuthSession();
     loadItems();
 });
 
@@ -23,6 +28,172 @@ function wireEvents() {
     document.getElementById("bidForm").addEventListener("submit", placeBid);
     document.getElementById("createItemForm").addEventListener("submit", createItem);
     document.getElementById("refreshAdminBtn").addEventListener("click", loadItems);
+
+    document.getElementById("openAuthBtn").addEventListener("click", openAuthModal);
+    document.getElementById("closeAuthBtn").addEventListener("click", closeAuthModal);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+
+    document.getElementById("showLoginTabBtn").addEventListener("click", () => setAuthTab("login"));
+    document.getElementById("showRegisterTabBtn").addEventListener("click", () => setAuthTab("register"));
+
+    document.getElementById("loginForm").addEventListener("submit", login);
+    document.getElementById("registerForm").addEventListener("submit", register);
+
+    document.getElementById("authModal").addEventListener("click", (event) => {
+        if (event.target.id === "authModal") {
+            closeAuthModal();
+        }
+    });
+}
+
+function initAuthSession() {
+    const raw = window.localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+        updateAuthUi();
+        return;
+    }
+
+    try {
+        const user = JSON.parse(raw);
+        state.currentUser = user;
+    } catch (error) {
+        state.currentUser = null;
+        window.localStorage.removeItem(SESSION_KEY);
+    }
+
+    updateAuthUi();
+}
+
+function openAuthModal() {
+    document.getElementById("authModal").classList.remove("hidden");
+    setAuthTab("login");
+}
+
+function closeAuthModal() {
+    document.getElementById("authModal").classList.add("hidden");
+}
+
+function setAuthTab(tab) {
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const loginTabBtn = document.getElementById("showLoginTabBtn");
+    const registerTabBtn = document.getElementById("showRegisterTabBtn");
+
+    if (tab === "register") {
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+        loginTabBtn.classList.remove("active");
+        registerTabBtn.classList.add("active");
+        return;
+    }
+
+    registerForm.classList.add("hidden");
+    loginForm.classList.remove("hidden");
+    registerTabBtn.classList.remove("active");
+    loginTabBtn.classList.add("active");
+}
+
+async function login(event) {
+    event.preventDefault();
+
+    const payload = {
+        username: document.getElementById("loginUsername").value.trim(),
+        password: document.getElementById("loginPassword").value
+    };
+
+    if (!payload.username || !payload.password) {
+        showToast("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", true);
+        return;
+    }
+
+    const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        showToast(await parseError(response), true);
+        return;
+    }
+
+    const user = await response.json();
+    state.currentUser = user;
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+
+    document.getElementById("loginForm").reset();
+    closeAuthModal();
+    updateAuthUi();
+    renderAdminTable();
+
+    showToast(`Đăng nhập thành công: ${user.displayName}.`, false);
+}
+
+async function register(event) {
+    event.preventDefault();
+
+    const payload = {
+        displayName: document.getElementById("registerDisplayName").value.trim(),
+        username: document.getElementById("registerUsername").value.trim(),
+        password: document.getElementById("registerPassword").value,
+        role: document.getElementById("registerRole").value
+    };
+
+    if (!payload.displayName || !payload.username || !payload.password) {
+        showToast("Vui lòng nhập đầy đủ thông tin đăng ký.", true);
+        return;
+    }
+
+    const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        showToast(await parseError(response), true);
+        return;
+    }
+
+    const user = await response.json();
+    state.currentUser = user;
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+
+    document.getElementById("registerForm").reset();
+    closeAuthModal();
+    updateAuthUi();
+    renderAdminTable();
+
+    showToast(`Tạo tài khoản thành công: ${user.displayName}.`, false);
+}
+
+function logout() {
+    state.currentUser = null;
+    window.localStorage.removeItem(SESSION_KEY);
+    updateAuthUi();
+    renderAdminTable();
+    showToast("Đã đăng xuất.", false);
+}
+
+function updateAuthUi() {
+    const userBadge = document.getElementById("userBadge");
+    const openAuthBtn = document.getElementById("openAuthBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const bidderNameInput = document.getElementById("bidderName");
+
+    if (!state.currentUser) {
+        userBadge.textContent = "Chưa đăng nhập";
+        openAuthBtn.hidden = false;
+        logoutBtn.hidden = true;
+        bidderNameInput.value = "";
+        bidderNameInput.placeholder = "VD: Mai Tấn Phát";
+        return;
+    }
+
+    userBadge.textContent = `${state.currentUser.displayName} (${getRoleLabel(state.currentUser.role)})`;
+    openAuthBtn.hidden = true;
+    logoutBtn.hidden = false;
+    bidderNameInput.value = state.currentUser.displayName;
 }
 
 async function loadItems() {
@@ -54,7 +225,7 @@ async function loadItems() {
             }
         }
     } catch (error) {
-        showToast(error.message || "Khong tai duoc danh sach vat pham.", true);
+        showToast(error.message || "Không tải được danh sách vật phẩm.", true);
     }
 }
 
@@ -98,18 +269,19 @@ function renderItemGrid() {
     const grid = document.getElementById("itemsGrid");
 
     if (state.filteredItems.length === 0) {
-        grid.innerHTML = "<div class='items-empty'>Khong tim thay vat pham phu hop.</div>";
+        grid.innerHTML = "<div class='items-empty'>Không tìm thấy vật phẩm phù hợp.</div>";
         return;
     }
 
     grid.innerHTML = state.filteredItems
         .map((item) => `
             <article class="item-card ${item.id === state.selectedItemId ? "active" : ""}" data-item-id="${item.id}">
+                <img class="item-thumb" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}" loading="lazy">
                 <div class="item-top">
                     <p class="item-title">${escapeHtml(item.name)}</p>
-                    <span class="item-tag">${escapeHtml(item.category || "Other")}</span>
+                    <span class="item-tag">${escapeHtml(item.category || "Khác")}</span>
                 </div>
-                <p class="item-meta">${escapeHtml(shortText(item.description || "No description.", 80))}</p>
+                <p class="item-meta">${escapeHtml(shortText(item.description || "Chưa có mô tả.", 80))}</p>
                 <p class="item-price">${formatCurrency(item.currentPrice)}</p>
             </article>
         `)
@@ -143,22 +315,26 @@ function renderItemDetail(item) {
     }
 
     setText("detailName", item.name);
-    setText("detailCategory", item.category || "Other");
-    setText("detailStatus", item.status);
+    setText("detailCategory", item.category || "Khác");
+    setText("detailStatus", item.status === "OPEN" ? "ĐANG MỞ" : "ĐÃ ĐÓNG");
     setText("detailStartPrice", formatCurrency(item.startingPrice));
     setText("detailCurrentPrice", formatCurrency(item.currentPrice));
     setText("detailCreatedAt", formatDate(item.createdAt));
-    setText("detailDescription", item.description || "No description.");
-    setText("bidItemHint", `Dang dat gia cho item #${item.id}: ${item.name}`);
+    setText("detailDescription", item.description || "Chưa có mô tả.");
+    setText("bidItemHint", `Bạn đang đặt giá cho vật phẩm #${item.id}: ${item.name}`);
+
+    const detailImage = document.getElementById("detailImage");
+    detailImage.src = normalizeImage(item.imageUrl);
+    detailImage.alt = item.name;
 
     const minBid = Math.floor(Number(item.currentPrice || 0) + 1);
     const bidAmountInput = document.getElementById("bidAmount");
     bidAmountInput.min = String(minBid);
-    bidAmountInput.placeholder = `Toi thieu ${minBid}`;
+    bidAmountInput.placeholder = `Tối thiểu ${minBid}`;
 
     document.getElementById("bidSubmitBtn").disabled = item.status !== "OPEN";
     if (item.status !== "OPEN") {
-        setText("bidItemHint", "Phien da dong. Admin can mo lai de tiep tuc dat gia.");
+        setText("bidItemHint", "Phiên đã đóng. Quản trị viên cần mở lại để tiếp tục đặt giá.");
     }
 }
 
@@ -169,8 +345,9 @@ function clearItemDetail() {
     setText("detailStartPrice", "-");
     setText("detailCurrentPrice", "-");
     setText("detailCreatedAt", "-");
-    setText("detailDescription", "Chon mot vat pham de xem mo ta.");
-    setText("bidItemHint", "Chon item o ben tren truoc.");
+    setText("detailDescription", "Chọn một vật phẩm để xem mô tả.");
+    setText("bidItemHint", "Chọn vật phẩm ở bên trên trước.");
+    document.getElementById("detailImage").src = FALLBACK_IMAGE;
     document.getElementById("bidSubmitBtn").disabled = true;
 }
 
@@ -189,7 +366,7 @@ async function loadBidHistory() {
         const bids = await response.json();
         renderBidHistory(bids);
     } catch (error) {
-        showToast(error.message || "Khong tai duoc lich su bid.", true);
+        showToast(error.message || "Không tải được lịch sử đặt giá.", true);
         renderBidHistory([]);
     }
 }
@@ -198,7 +375,7 @@ function renderBidHistory(bids) {
     const history = document.getElementById("bidHistory");
 
     if (!bids || bids.length === 0) {
-        history.innerHTML = "<li class='history-empty'>Chua co luot dat gia nao.</li>";
+        history.innerHTML = "<li class='history-empty'>Chưa có lượt đặt giá nào.</li>";
         return;
     }
 
@@ -214,14 +391,18 @@ function renderBidHistory(bids) {
 async function placeBid(event) {
     event.preventDefault();
 
+    if (!ensureRole(["BIDDER", "ADMIN"], "Bạn cần đăng nhập với vai trò Người đấu giá hoặc Quản trị viên để đặt giá.")) {
+        return;
+    }
+
     if (!state.selectedItemId) {
-        showToast("Ban can chon item truoc khi dat gia.", true);
+        showToast("Bạn cần chọn vật phẩm trước khi đặt giá.", true);
         return;
     }
 
     const item = getSelectedItem();
     if (!item || item.status !== "OPEN") {
-        showToast("Phien da dong. Khong the dat gia.", true);
+        showToast("Phiên đã đóng. Không thể đặt giá.", true);
         return;
     }
 
@@ -229,7 +410,7 @@ async function placeBid(event) {
     const amount = Number(document.getElementById("bidAmount").value);
 
     if (!bidderName || Number.isNaN(amount) || amount <= 0) {
-        showToast("Vui long nhap dung ten va so tien dat gia.", true);
+        showToast("Vui lòng nhập đúng tên và số tiền đặt giá.", true);
         return;
     }
 
@@ -247,21 +428,26 @@ async function placeBid(event) {
     document.getElementById("bidAmount").value = "";
     await loadItems();
     await loadBidHistory();
-    showToast("Dat gia thanh cong.", false);
+    showToast("Đặt giá thành công.", false);
 }
 
 async function createItem(event) {
     event.preventDefault();
 
+    if (!ensureRole(["SELLER", "ADMIN"], "Bạn cần đăng nhập với vai trò Người bán hoặc Quản trị viên để đăng sản phẩm.")) {
+        return;
+    }
+
     const payload = {
         name: document.getElementById("itemName").value.trim(),
         category: document.getElementById("itemCategory").value.trim(),
         description: document.getElementById("itemDescription").value.trim(),
+        imageUrl: document.getElementById("itemImageUrl").value.trim(),
         startingPrice: Number(document.getElementById("itemStartingPrice").value)
     };
 
     if (!payload.name || Number.isNaN(payload.startingPrice) || payload.startingPrice <= 0) {
-        showToast("Ten vat pham va gia khoi diem la bat buoc.", true);
+        showToast("Tên vật phẩm và giá khởi điểm là bắt buộc.", true);
         return;
     }
 
@@ -281,48 +467,56 @@ async function createItem(event) {
 
     await loadItems();
     await selectItem(createdItem.id);
-    showToast("Da tao phien dau gia moi.", false);
+    showToast("Đã tạo phiên đấu giá mới.", false);
 }
 
 function renderAdminTable() {
     const tbody = document.getElementById("adminTableBody");
 
     if (state.items.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='6' class='items-empty'>Chua co du lieu.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='7' class='items-empty'>Chưa có dữ liệu.</td></tr>";
         return;
     }
 
     const sorted = [...state.items].sort((a, b) => Number(b.id) - Number(a.id));
+    const isAdmin = hasRole("ADMIN");
 
     tbody.innerHTML = sorted
         .map((item) => {
             const isOpen = item.status === "OPEN";
             const nextStatus = isOpen ? "CLOSED" : "OPEN";
             const actionClass = isOpen ? "table-btn-close" : "table-btn-open";
-            const actionText = isOpen ? "Dong phien" : "Mo lai";
+            const actionText = isOpen ? "Đóng phiên" : "Mở lại";
             const statusClass = isOpen ? "status-open" : "status-closed";
+            const statusLabel = isOpen ? "ĐANG MỞ" : "ĐÃ ĐÓNG";
+            const actionHtml = isAdmin
+                ? `<button
+                        type="button"
+                        class="table-btn ${actionClass}"
+                        data-status-toggle="true"
+                        data-item-id="${item.id}"
+                        data-next-status="${nextStatus}">
+                        ${actionText}
+                   </button>`
+                : `<span class="table-disabled-text">Chỉ quản trị viên</span>`;
 
             return `
                 <tr>
                     <td>#${item.id}</td>
+                    <td><img class="admin-thumb" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}"></td>
                     <td>${escapeHtml(item.name)}</td>
-                    <td>${escapeHtml(item.category || "Other")}</td>
+                    <td>${escapeHtml(item.category || "Khác")}</td>
                     <td>${formatCurrency(item.currentPrice)}</td>
-                    <td><span class="status-pill ${statusClass}">${item.status}</span></td>
-                    <td>
-                        <button
-                            type="button"
-                            class="table-btn ${actionClass}"
-                            data-status-toggle="true"
-                            data-item-id="${item.id}"
-                            data-next-status="${nextStatus}">
-                            ${actionText}
-                        </button>
-                    </td>
+                    <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                    <td>${actionHtml}</td>
                 </tr>
             `;
         })
         .join("");
+
+    if (!isAdmin) {
+        return;
+    }
 
     tbody.querySelectorAll("[data-status-toggle='true']").forEach((button) => {
         button.addEventListener("click", async () => {
@@ -335,6 +529,10 @@ function renderAdminTable() {
 }
 
 async function updateItemStatus(itemId, nextStatus) {
+    if (!ensureRole(["ADMIN"], "Bạn cần đăng nhập với vai trò Quản trị viên.")) {
+        return;
+    }
+
     const response = await fetch(`/api/items/${itemId}/status?value=${nextStatus}`, {
         method: "PATCH"
     });
@@ -349,7 +547,7 @@ async function updateItemStatus(itemId, nextStatus) {
         await loadBidHistory();
     }
 
-    showToast(nextStatus === "CLOSED" ? "Da dong phien dau gia." : "Da mo lai phien dau gia.", false);
+    showToast(nextStatus === "CLOSED" ? "Đã đóng phiên đấu giá." : "Đã mở lại phiên đấu giá.", false);
 }
 
 function updateStats() {
@@ -362,8 +560,44 @@ function updateStats() {
     setText("highestPrice", formatCurrency(highest));
 }
 
+function hasRole(role) {
+    return state.currentUser && state.currentUser.role === role;
+}
+
+function ensureRole(roles, message) {
+    if (!state.currentUser) {
+        showToast("Bạn cần đăng nhập trước.", true);
+        openAuthModal();
+        return false;
+    }
+
+    if (!roles.includes(state.currentUser.role)) {
+        showToast(message, true);
+        return false;
+    }
+
+    return true;
+}
+
+function getRoleLabel(role) {
+    if (role === "ADMIN") {
+        return "Quản trị viên";
+    }
+    if (role === "SELLER") {
+        return "Người bán";
+    }
+    return "Người đấu giá";
+}
+
 function getSelectedItem() {
     return state.items.find((item) => item.id === state.selectedItemId) || null;
+}
+
+function normalizeImage(value) {
+    if (!value || !String(value).trim()) {
+        return FALLBACK_IMAGE;
+    }
+    return String(value).trim();
 }
 
 function setText(id, value) {
@@ -405,7 +639,7 @@ async function parseError(response) {
         }
     } catch (error) {
     }
-    return `Request that bai (${response.status}).`;
+    return `Yêu cầu thất bại (${response.status}).`;
 }
 
 function showToast(message, isError) {
@@ -427,4 +661,8 @@ function escapeHtml(raw) {
     const div = document.createElement("div");
     div.textContent = raw;
     return div.innerHTML;
+}
+
+function escapeAttr(raw) {
+    return escapeHtml(raw).replace(/"/g, "&quot;");
 }
