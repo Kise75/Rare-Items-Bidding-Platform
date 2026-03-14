@@ -42,16 +42,16 @@ public class AuctionService {
     public RareItem getItemById(Long itemId) {
         RareItem item = itemStore.get(itemId);
         if (item == null) {
-            throw new ResourceNotFoundException("Item with id " + itemId + " was not found.");
+            throw new ResourceNotFoundException("Không tìm thấy vật phẩm có id " + itemId + ".");
         }
         return item;
     }
 
     public RareItem createItem(CreateItemRequest request) {
         Long itemId = itemIdSequence.incrementAndGet();
-        String normalizedName = normalizeText(request.name(), "Unnamed item");
-        String normalizedCategory = normalizeText(request.category(), "Uncategorized");
-        String normalizedDescription = normalizeText(request.description(), "No description.");
+        String normalizedName = normalizeText(request.name(), "Vật phẩm chưa đặt tên");
+        String normalizedCategory = normalizeText(request.category(), "Khác");
+        String normalizedDescription = normalizeText(request.description(), "Chưa có mô tả.");
         String normalizedImageUrl = normalizeImageUrl(request.imageUrl(), defaultImageByCategory(normalizedCategory));
         BigDecimal startingPrice = normalizeMoney(request.startingPrice());
 
@@ -84,20 +84,20 @@ public class AuctionService {
         RareItem item = getItemById(itemId);
 
         if (item.status() != AuctionStatus.OPEN) {
-            throw new BusinessRuleException("Auction is closed for item " + itemId + ".");
+            throw new BusinessRuleException("Phiên đấu giá của vật phẩm " + itemId + " đã đóng.");
         }
 
         BigDecimal bidAmount = normalizeMoney(request.amount());
         if (bidAmount.compareTo(item.currentPrice()) <= 0) {
             throw new BusinessRuleException(
-                    "Bid amount must be greater than current price (" + item.currentPrice() + ")."
+                    "Giá đặt phải lớn hơn giá hiện tại (" + item.currentPrice() + ")."
             );
         }
 
         Bid bid = new Bid(
                 bidIdSequence.incrementAndGet(),
                 itemId,
-                normalizeText(request.bidderName(), "Anonymous"),
+                normalizeText(request.bidderName(), "Người dùng ẩn danh"),
                 bidAmount,
                 LocalDateTime.now()
         );
@@ -120,18 +120,18 @@ public class AuctionService {
 
     private void seedDemoData() {
         createItem(new CreateItemRequest(
-                "Vintage Mechanical Watch",
-                "Watch",
-                "Swiss watch from the 1970s in very good condition.",
-                "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1200&q=80",
+                "Đồng hồ cơ cổ điển",
+                "Đồng hồ",
+                "Đồng hồ cơ phong cách cổ điển, máy chạy ổn định, phù hợp sưu tầm.",
+                "https://picsum.photos/seed/rare-watch/1200/800",
                 new BigDecimal("5000000")
         ));
 
         createItem(new CreateItemRequest(
-                "Porcelain Tea Set",
-                "Ceramic",
-                "Hand-painted collectible tea set with original box.",
-                "https://images.unsplash.com/photo-1612196808214-b7e239e5f6f1?auto=format&fit=crop&w=1200&q=80",
+                "Bộ ấm trà sứ thủ công",
+                "Gốm sứ",
+                "Bộ ấm trà sứ vẽ tay, còn hộp bảo quản, thích hợp trưng bày.",
+                "https://picsum.photos/seed/rare-tea-set/1200/800",
                 new BigDecimal("2500000")
         ));
     }
@@ -156,15 +156,15 @@ public class AuctionService {
 
     private String defaultImageByCategory(String category) {
         String normalized = category.toLowerCase();
-        if (normalized.contains("watch") || normalized.contains("dong ho")) {
-            return "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=1200&q=80";
+        if (normalized.contains("đồng hồ") || normalized.contains("dong ho") || normalized.contains("watch")) {
+            return "https://picsum.photos/seed/default-watch/1200/800";
         }
-        if (normalized.contains("coin") || normalized.contains("tien")) {
-            return "https://images.unsplash.com/photo-1610375461369-d613b56438b6?auto=format&fit=crop&w=1200&q=80";
+        if (normalized.contains("tiền") || normalized.contains("tien") || normalized.contains("coin")) {
+            return "https://picsum.photos/seed/default-coin/1200/800";
         }
-        if (normalized.contains("art") || normalized.contains("tranh")) {
-            return "https://images.unsplash.com/photo-1577083288073-40892c0860a4?auto=format&fit=crop&w=1200&q=80";
+        if (normalized.contains("tranh") || normalized.contains("art")) {
+            return "https://picsum.photos/seed/default-art/1200/800";
         }
-        return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80";
+        return "https://picsum.photos/seed/default-collectible/1200/800";
     }
 }

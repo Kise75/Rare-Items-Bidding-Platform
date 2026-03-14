@@ -1,12 +1,16 @@
-﻿const state = {
+const ROUTES = ["home", "marketplace", "sell", "admin"];
+const SESSION_KEY = "rarebid_current_user";
+const FALLBACK_IMAGE = "/images/item-placeholder.svg";
+
+const state = {
     items: [],
     filteredItems: [],
     selectedItemId: null,
-    currentUser: null
+    currentUser: null,
+    currentPage: 1,
+    pageSize: 6,
+    route: "home"
 };
-
-const SESSION_KEY = "rarebid_current_user";
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80";
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -19,12 +23,14 @@ let toastTimer = null;
 document.addEventListener("DOMContentLoaded", () => {
     wireEvents();
     initAuthSession();
+    initRouteFromHash();
+    bindImageFallback(document.getElementById("detailImage"));
     loadItems();
 });
 
 function wireEvents() {
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("sortSelect").addEventListener("change", applyFilters);
+    document.getElementById("searchInput").addEventListener("input", () => applyFilters(true));
+    document.getElementById("sortSelect").addEventListener("change", () => applyFilters(true));
     document.getElementById("bidForm").addEventListener("submit", placeBid);
     document.getElementById("createItemForm").addEventListener("submit", createItem);
     document.getElementById("refreshAdminBtn").addEventListener("click", loadItems);
@@ -44,6 +50,17 @@ function wireEvents() {
             closeAuthModal();
         }
     });
+
+    document.querySelectorAll("[data-route]").forEach((node) => {
+        node.addEventListener("click", (event) => {
+            event.preventDefault();
+            setRoute(node.dataset.route, true);
+        });
+    });
+
+    window.addEventListener("hashchange", () => {
+        setRoute(readRouteFromHash(), false);
+    });
 }
 
 function initAuthSession() {
@@ -54,14 +71,58 @@ function initAuthSession() {
     }
 
     try {
-        const user = JSON.parse(raw);
-        state.currentUser = user;
+        state.currentUser = JSON.parse(raw);
     } catch (error) {
         state.currentUser = null;
         window.localStorage.removeItem(SESSION_KEY);
     }
 
     updateAuthUi();
+}
+
+function initRouteFromHash() {
+    const route = readRouteFromHash();
+    setRoute(route, false);
+
+    if (!window.location.hash) {
+        window.location.hash = `#${route}`;
+    }
+}
+
+function readRouteFromHash() {
+    const raw = window.location.hash.replace("#", "").trim().toLowerCase();
+    if (!raw || raw === "welcome") {
+        return "home";
+    }
+
+    if (raw === "market") {
+        return "marketplace";
+    }
+
+    if (ROUTES.includes(raw)) {
+        return raw;
+    }
+
+    return "home";
+}
+
+function setRoute(route, updateHash) {
+    const normalized = ROUTES.includes(route) ? route : "home";
+    state.route = normalized;
+
+    document.querySelectorAll(".app-page").forEach((page) => {
+        page.classList.toggle("active", page.dataset.page === normalized);
+    });
+
+    document.querySelectorAll("[data-route]").forEach((node) => {
+        node.classList.toggle("active", node.dataset.route === normalized);
+    });
+
+    if (updateHash && window.location.hash !== `#${normalized}`) {
+        window.location.hash = normalized;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function openAuthModal() {
@@ -205,11 +266,14 @@ async function loadItems() {
 
         state.items = await response.json();
         updateStats();
-        applyFilters();
+        applyFilters(false);
         renderAdminTable();
 
         if (!state.selectedItemId && state.filteredItems.length > 0) {
-            await selectItem(state.filteredItems[0].id);
+            const firstVisible = getVisibleItems()[0] || state.filteredItems[0];
+            if (firstVisible) {
+                await selectItem(firstVisible.id);
+            }
             return;
         }
 
@@ -229,9 +293,13 @@ async function loadItems() {
     }
 }
 
-function applyFilters() {
+function applyFilters(resetPage = true) {
     const searchText = document.getElementById("searchInput").value.trim().toLowerCase();
     const sort = document.getElementById("sortSelect").value;
+
+    if (resetPage) {
+        state.currentPage = 1;
+    }
 
     state.filteredItems = state.items.filter((item) => {
         if (!searchText) {
@@ -250,7 +318,13 @@ function applyFilters() {
         state.filteredItems.sort((a, b) => Number(b.id) - Number(a.id));
     }
 
+    const pageCount = getPageCount();
+    if (state.currentPage > pageCount) {
+        state.currentPage = Math.max(1, pageCount);
+    }
+
     renderItemGrid();
+    renderMarketPager();
 
     if (state.filteredItems.length === 0) {
         state.selectedItemId = null;
@@ -259,24 +333,47 @@ function applyFilters() {
         return;
     }
 
-    const selectedInFilter = state.filteredItems.some((item) => item.id === state.selectedItemId);
-    if (!selectedInFilter) {
-        selectItem(state.filteredItems[0].id);
+    const visibleItems = getVisibleItems();
+    const selectedVisible = visibleItems.some((item) => item.id === state.selectedItemId);
+
+    if (!selectedVisible) {
+        const firstVisible = visibleItems[0];
+        if (firstVisible) {
+            void selectItem(firstVisible.id);
+        }
+        return;
     }
+
+    renderSelectionState();
+    renderItemDetail(getSelectedItem());
+}
+
+function getPageCount() {
+    if (state.filteredItems.length === 0) {
+        return 1;
+    }
+    return Math.max(1, Math.ceil(state.filteredItems.length / state.pageSize));
+}
+
+function getVisibleItems() {
+    const start = (state.currentPage - 1) * state.pageSize;
+    const end = start + state.pageSize;
+    return state.filteredItems.slice(start, end);
 }
 
 function renderItemGrid() {
     const grid = document.getElementById("itemsGrid");
+    const pageItems = getVisibleItems();
 
     if (state.filteredItems.length === 0) {
         grid.innerHTML = "<div class='items-empty'>Không tìm thấy vật phẩm phù hợp.</div>";
         return;
     }
 
-    grid.innerHTML = state.filteredItems
+    grid.innerHTML = pageItems
         .map((item) => `
             <article class="item-card ${item.id === state.selectedItemId ? "active" : ""}" data-item-id="${item.id}">
-                <img class="item-thumb" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}" loading="lazy">
+                <img class="item-thumb" data-fallback="true" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}" loading="lazy">
                 <div class="item-top">
                     <p class="item-title">${escapeHtml(item.name)}</p>
                     <span class="item-tag">${escapeHtml(item.category || "Khác")}</span>
@@ -287,12 +384,58 @@ function renderItemGrid() {
         `)
         .join("");
 
+    bindImageFallbacks(grid);
+
     grid.querySelectorAll(".item-card").forEach((card) => {
         card.addEventListener("click", () => {
             const itemId = Number(card.dataset.itemId);
-            selectItem(itemId);
+            void selectItem(itemId);
         });
     });
+}
+
+function renderMarketPager() {
+    const pager = document.getElementById("marketPager");
+    const totalPages = getPageCount();
+
+    if (state.filteredItems.length === 0 || totalPages <= 1) {
+        pager.innerHTML = "";
+        return;
+    }
+
+    pager.innerHTML = `
+        <button type="button" class="pager-btn" data-page-action="prev" ${state.currentPage <= 1 ? "disabled" : ""}>Trước</button>
+        <span class="pager-info">Trang ${state.currentPage}/${totalPages}</span>
+        <button type="button" class="pager-btn" data-page-action="next" ${state.currentPage >= totalPages ? "disabled" : ""}>Sau</button>
+    `;
+
+    pager.querySelectorAll("[data-page-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const action = button.dataset.pageAction;
+            const nextPage = action === "prev" ? state.currentPage - 1 : state.currentPage + 1;
+            changePage(nextPage);
+        });
+    });
+}
+
+function changePage(page) {
+    const totalPages = getPageCount();
+    const normalized = Math.min(totalPages, Math.max(1, page));
+    if (normalized === state.currentPage) {
+        return;
+    }
+
+    state.currentPage = normalized;
+    renderItemGrid();
+    renderMarketPager();
+
+    const visibleItems = getVisibleItems();
+    const selectedVisible = visibleItems.some((item) => item.id === state.selectedItemId);
+    if (!selectedVisible && visibleItems.length > 0) {
+        void selectItem(visibleItems[0].id);
+    } else {
+        renderSelectionState();
+    }
 }
 
 async function selectItem(itemId) {
@@ -324,8 +467,7 @@ function renderItemDetail(item) {
     setText("bidItemHint", `Bạn đang đặt giá cho vật phẩm #${item.id}: ${item.name}`);
 
     const detailImage = document.getElementById("detailImage");
-    detailImage.src = normalizeImage(item.imageUrl);
-    detailImage.alt = item.name;
+    setImageSource(detailImage, normalizeImage(item.imageUrl), item.name);
 
     const minBid = Math.floor(Number(item.currentPrice || 0) + 1);
     const bidAmountInput = document.getElementById("bidAmount");
@@ -347,7 +489,7 @@ function clearItemDetail() {
     setText("detailCreatedAt", "-");
     setText("detailDescription", "Chọn một vật phẩm để xem mô tả.");
     setText("bidItemHint", "Chọn vật phẩm ở bên trên trước.");
-    document.getElementById("detailImage").src = FALLBACK_IMAGE;
+    setImageSource(document.getElementById("detailImage"), FALLBACK_IMAGE, "Ảnh mặc định");
     document.getElementById("bidSubmitBtn").disabled = true;
 }
 
@@ -465,6 +607,7 @@ async function createItem(event) {
     const createdItem = await response.json();
     document.getElementById("createItemForm").reset();
 
+    setRoute("marketplace", true);
     await loadItems();
     await selectItem(createdItem.id);
     showToast("Đã tạo phiên đấu giá mới.", false);
@@ -498,12 +641,12 @@ function renderAdminTable() {
                         data-next-status="${nextStatus}">
                         ${actionText}
                    </button>`
-                : `<span class="table-disabled-text">Chỉ quản trị viên</span>`;
+                : "<span class='table-disabled-text'>Chỉ quản trị viên</span>";
 
             return `
                 <tr>
                     <td>#${item.id}</td>
-                    <td><img class="admin-thumb" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}"></td>
+                    <td><img class="admin-thumb" data-fallback="true" src="${escapeAttr(normalizeImage(item.imageUrl))}" alt="${escapeAttr(item.name)}"></td>
                     <td>${escapeHtml(item.name)}</td>
                     <td>${escapeHtml(item.category || "Khác")}</td>
                     <td>${formatCurrency(item.currentPrice)}</td>
@@ -513,6 +656,8 @@ function renderAdminTable() {
             `;
         })
         .join("");
+
+    bindImageFallbacks(tbody);
 
     if (!isAdmin) {
         return;
@@ -597,7 +742,70 @@ function normalizeImage(value) {
     if (!value || !String(value).trim()) {
         return FALLBACK_IMAGE;
     }
-    return String(value).trim();
+
+    const url = String(value).trim();
+    if (/^(https?:\/\/|\/|data:image\/)/i.test(url)) {
+        return url;
+    }
+
+    return FALLBACK_IMAGE;
+}
+
+function setImageSource(image, source, alt) {
+    if (!image) {
+        return;
+    }
+
+    image.alt = alt || "Ảnh vật phẩm";
+    image.dataset.fallbackApplied = "0";
+    image.src = source;
+
+    if (source === FALLBACK_IMAGE) {
+        image.classList.add("is-fallback");
+    } else {
+        image.classList.remove("is-fallback");
+    }
+
+    bindImageFallback(image);
+}
+
+function bindImageFallbacks(root) {
+    if (!root) {
+        return;
+    }
+
+    root.querySelectorAll("img[data-fallback='true']").forEach((image) => {
+        bindImageFallback(image);
+    });
+}
+
+function bindImageFallback(image) {
+    if (!image || image.dataset.fallbackBound === "1") {
+        return;
+    }
+
+    image.dataset.fallbackBound = "1";
+    if (!image.dataset.fallbackApplied) {
+        image.dataset.fallbackApplied = "0";
+    }
+
+    image.addEventListener("error", () => {
+        if (image.dataset.fallbackApplied === "1") {
+            return;
+        }
+
+        image.dataset.fallbackApplied = "1";
+        image.classList.add("is-fallback");
+        image.src = FALLBACK_IMAGE;
+    });
+
+    image.addEventListener("load", () => {
+        if ((image.currentSrc || image.src).includes("item-placeholder.svg")) {
+            image.classList.add("is-fallback");
+        } else {
+            image.classList.remove("is-fallback");
+        }
+    });
 }
 
 function setText(id, value) {

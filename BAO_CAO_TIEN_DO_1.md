@@ -1,67 +1,76 @@
-﻿# BAO CAO TIEN DO 1 - Rare Items Bidding Platform
+# BÁO CÁO TIẾN ĐỘ 1 - DỰ ÁN RARE ITEMS BIDDING PLATFORM
 
-- Sinh vien: Mai Tan Phat
-- MSSV: 2280602300
-- Mon hoc: COS141 - Application Development using J2EE
-- Tuan bao cao: 08/03/2026 - 14/03/2026
+- Sinh viên thực hiện: Mai Tấn Phát  
+- MSSV: 2280602300  
+- Thời gian báo cáo: 08/03/2026 - 14/03/2026
 
-## 1. Muc tieu tuan 1
+## 1. Mục tiêu tuần 1
 
-Xay dung bo khung backend cho de tai "He thong dau gia do suu tam" bang Spring Boot de co the demo duoc cac chuc nang cot loi dau tien.
+Hoàn thiện phiên bản MVP đầu tiên của hệ thống đấu giá đồ sưu tầm, bao gồm:
+- Khung backend chạy ổn định.
+- API cốt lõi để quản lý vật phẩm và đặt giá.
+- Giao diện web demo được các luồng chính (xem vật phẩm, đặt giá, đăng vật phẩm, quản trị phiên).
 
-## 2. Cong viec da lam trong tuan
+## 2. Công việc đã làm trong tuần
 
-1. Khoi tao va chuan hoa cau truc du an Spring Boot
-- Kiem tra cau truc Maven, package, source va test.
-- Cap nhat README mo ta ro pham vi tien do 1.
+1. Khởi tạo và chuẩn hóa dự án Spring Boot
+- Tổ chức lại cấu trúc package theo mô hình controller/service/dto/model/exception.
+- Thiết lập Maven và kiểm tra khả năng build, chạy ứng dụng.
 
-2. Xay dung API cot loi cho dau gia (ban dau)
-- Tao endpoint `GET /welcome`.
-- Tao nhom endpoint cho item va bid:
+2. Xây dựng API cốt lõi cho đấu giá
+- Triển khai các API:
+  - `GET /welcome`
   - `GET /api/items`
   - `GET /api/items/{itemId}`
   - `POST /api/items`
   - `GET /api/items/{itemId}/bids`
   - `POST /api/items/{itemId}/bids`
+  - `PATCH /api/items/{itemId}/status`
 
-3. Viet business logic cho phien dau gia
-- Tao service xu ly tao vat pham, danh sach vat pham, dat gia.
-- Dat quy tac: gia dat moi phai lon hon gia hien tai.
-- Khoi tao du lieu mau de demo nhanh.
+3. Xử lý nghiệp vụ chính
+- Tạo vật phẩm đấu giá mới.
+- Đặt giá theo quy tắc: giá mới phải lớn hơn giá hiện tại.
+- Quản lý trạng thái phiên: mở/đóng.
+- Bổ sung dữ liệu mẫu để demo nhanh.
 
-4. Bo sung validation va xu ly loi
-- Validate du lieu dau vao cho tao item/dat gia.
-- Bo sung xu ly loi tap trung (404, 400, 500) va tra JSON thong nhat.
+4. Bổ sung xác thực tài khoản cơ bản
+- Đăng ký, đăng nhập tài khoản cho 2 vai trò: Người bán và Người đấu giá.
+- Không cho phép tự đăng ký tài khoản Quản trị viên.
+- Lưu phiên đăng nhập phía client để thao tác theo vai trò.
 
-5. Viet test co ban
-- Them test cho service de kiem tra:
-  - Tao item thanh cong.
-  - Dat gia hop le.
-  - Tu choi gia khong hop le.
-  - Bao loi khi item khong ton tai.
+5. Xây dựng và chỉnh sửa giao diện web
+- Thiết kế lại giao diện theo 4 khu vực:
+  - Trang chủ
+  - Sàn đấu giá
+  - Khu người bán
+  - Trang quản trị
+- Thêm phân trang danh sách vật phẩm.
+- Thêm hiển thị ảnh sản phẩm và cơ chế ảnh dự phòng khi link ảnh lỗi.
+- Cải thiện màu sắc, độ tương phản chữ và trải nghiệm sử dụng.
 
-## 3. Danh sach source code moi trong tuan
+6. Xử lý validation và lỗi
+- Thêm kiểm tra dữ liệu đầu vào cho đăng ký, đăng nhập, tạo vật phẩm, đặt giá.
+- Chuẩn hóa thông báo lỗi theo ngữ cảnh nghiệp vụ.
 
-- `src/main/java/com/maitanphat/rareitems/controller/AuctionController.java`
-- `src/main/java/com/maitanphat/rareitems/service/AuctionService.java`
-- `src/main/java/com/maitanphat/rareitems/model/AuctionStatus.java`
-- `src/main/java/com/maitanphat/rareitems/model/RareItem.java`
-- `src/main/java/com/maitanphat/rareitems/model/Bid.java`
-- `src/main/java/com/maitanphat/rareitems/dto/CreateItemRequest.java`
-- `src/main/java/com/maitanphat/rareitems/dto/PlaceBidRequest.java`
-- `src/main/java/com/maitanphat/rareitems/exception/ApiError.java`
-- `src/main/java/com/maitanphat/rareitems/exception/BusinessRuleException.java`
-- `src/main/java/com/maitanphat/rareitems/exception/ResourceNotFoundException.java`
-- `src/main/java/com/maitanphat/rareitems/exception/GlobalExceptionHandler.java`
-- `src/test/java/com/maitanphat/rareitems/service/AuctionServiceTest.java`
+## 3. Kết quả đạt được
 
-## 4. Ket qua dat duoc
+- Ứng dụng chạy được end-to-end cho luồng demo tuần 1.
+- Người dùng có thể:
+  - Xem danh sách vật phẩm đấu giá.
+  - Xem chi tiết và lịch sử đặt giá.
+  - Đặt giá theo điều kiện hợp lệ.
+  - Đăng vật phẩm mới (vai trò người bán).
+  - Quản lý trạng thái phiên (vai trò quản trị).
+- Source code đã sẵn sàng để commit lên GitHub repo theo yêu cầu.
 
-- Du an da co backend API cot loi de demo chuc nang dau gia co ban.
-- Co the gui source code len GitHub theo yeu cau "source code moi da duoc commit".
+## 4. Khó khăn trong tuần
 
-## 5. Ke hoach tuan 2
+- Cần cân bằng giữa tiến độ backend và mức độ hoàn thiện giao diện trong cùng tuần.
+- Một số link ảnh ngoài không ổn định, phải bổ sung cơ chế fallback để tránh lỗi hiển thị.
 
-- Tich hop CSDL (MySQL/PostgreSQL) thay cho in-memory.
-- Them bang User va Item theo quan he du lieu thuc te.
-- Bat dau xay dung chuc nang dang ky/dang nhap co ban.
+## 5. Kế hoạch tuần 2
+
+- Chuyển dữ liệu từ in-memory sang cơ sở dữ liệu (MySQL/PostgreSQL).
+- Hoàn thiện mô hình User/Item/Bid theo quan hệ dữ liệu thực tế.
+- Tăng cường bảo mật đăng nhập (mã hóa mật khẩu, phân quyền chặt hơn).
+- Bổ sung test cho controller/service và chuẩn hóa dữ liệu đầu ra API.

@@ -7,12 +7,12 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public record PlaceBidRequest(
-        @NotBlank(message = "Bidder name is required.")
-        @Size(max = 80, message = "Bidder name must be at most 80 characters.")
+        @NotBlank(message = "Tên người đấu giá là bắt buộc.")
+        @Size(max = 80, message = "Tên người đấu giá tối đa 80 ký tự.")
         String bidderName,
 
-        @NotNull(message = "Bid amount is required.")
-        @DecimalMin(value = "0.01", message = "Bid amount must be greater than 0.")
+        @NotNull(message = "Số tiền đặt giá là bắt buộc.")
+        @DecimalMin(value = "0.01", message = "Số tiền đặt giá phải lớn hơn 0.")
         BigDecimal amount
 ) {
 }

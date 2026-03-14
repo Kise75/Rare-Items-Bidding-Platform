@@ -21,16 +21,25 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         String username = normalize(request.username());
         String usernameKey = username.toLowerCase();
+        UserRole role = request.role();
 
         if (accounts.containsKey(usernameKey)) {
             throw new BusinessRuleException("Tên đăng nhập đã tồn tại.");
+        }
+
+        if (role == null) {
+            throw new BusinessRuleException("Vai trò là bắt buộc.");
+        }
+
+        if (role == UserRole.ADMIN) {
+            throw new BusinessRuleException("Không thể tự đăng ký tài khoản quản trị viên.");
         }
 
         UserAccount account = new UserAccount(
                 normalize(request.displayName()),
                 username,
                 request.password().trim(),
-                request.role()
+                role
         );
 
         accounts.put(usernameKey, account);

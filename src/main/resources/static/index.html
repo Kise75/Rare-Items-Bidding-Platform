@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -14,15 +14,16 @@
 <div class="bg-shape bg-shape-b"></div>
 
 <header class="topbar">
-    <a class="brand" href="#home">
+    <a class="brand" href="#home" data-route="home">
         <span class="brand-badge">RB</span>
         <span>Rare Items Bidding</span>
     </a>
 
-    <nav class="topnav">
-        <a href="#marketplace">Sàn đấu giá</a>
-        <a href="#sell">Khu người bán</a>
-        <a href="#admin">Quản trị</a>
+    <nav class="topnav" aria-label="Điều hướng chính">
+        <a href="#home" data-route="home" class="active">Trang chủ</a>
+        <a href="#marketplace" data-route="marketplace">Sàn đấu giá</a>
+        <a href="#sell" data-route="sell">Người bán</a>
+        <a href="#admin" data-route="admin">Quản trị</a>
     </nav>
 
     <div class="auth-controls">
@@ -33,156 +34,310 @@
 </header>
 
 <main class="container">
-    <section id="home" class="hero panel">
-        <div class="hero-copy">
-            <p class="eyebrow">Nền tảng đấu giá trực tuyến</p>
-            <h1>Đấu giá đồ sưu tầm minh bạch và chuyên nghiệp</h1>
-            <p class="hero-text">
-                Nền tảng giúp người bán đăng vật phẩm, người mua đặt giá theo thời gian thực,
-                và quản trị viên quản lý phiên đấu giá tập trung trên một hệ thống duy nhất.
-            </p>
-            <div class="hero-actions">
-                <a class="cta-link" href="#marketplace">Bắt đầu đấu giá</a>
-                <a class="cta-link secondary" href="#sell">Đăng sản phẩm</a>
-            </div>
-        </div>
-        <div class="stats-grid">
-            <article class="stat-card">
-                <p class="stat-label">Vật phẩm đang đấu giá</p>
-                <p class="stat-value" id="totalItems">0</p>
-            </article>
-            <article class="stat-card">
-                <p class="stat-label">Phiên đang mở</p>
-                <p class="stat-value" id="openItems">0</p>
-            </article>
-            <article class="stat-card">
-                <p class="stat-label">Giá cao nhất hiện tại</p>
-                <p class="stat-value" id="highestPrice">0</p>
-            </article>
-        </div>
-    </section>
-
-    <section id="marketplace" class="panel">
-        <div class="panel-header">
-            <div>
-                <h2>Sàn đấu giá</h2>
-                <p>Xem danh sách vật phẩm, lọc nhanh, và chọn sản phẩm để đặt giá.</p>
-            </div>
-            <div class="filters">
-                <label class="input-wrap">
-                    <span>Tìm kiếm</span>
-                    <input type="text" id="searchInput" placeholder="Nhập tên, danh mục, mô tả...">
-                </label>
-                <label class="input-wrap">
-                    <span>Sắp xếp</span>
-                    <select id="sortSelect">
-                        <option value="newest">Mới nhất</option>
-                        <option value="priceDesc">Giá cao đến thấp</option>
-                        <option value="priceAsc">Giá thấp đến cao</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-        <div id="itemsGrid" class="items-grid"></div>
-    </section>
-
-    <section class="split-layout">
-        <article class="panel">
-            <h2>Chi tiết phiên đấu giá</h2>
-
-            <div class="detail-head">
-                <div class="detail-image-wrap">
-                    <img id="detailImage" src="" alt="Ảnh vật phẩm">
-                </div>
-                <div class="detail-grid">
-                    <p><strong>Tên vật phẩm:</strong> <span id="detailName">-</span></p>
-                    <p><strong>Danh mục:</strong> <span id="detailCategory">-</span></p>
-                    <p><strong>Trạng thái:</strong> <span id="detailStatus">-</span></p>
-                    <p><strong>Giá khởi điểm:</strong> <span id="detailStartPrice">-</span></p>
-                    <p><strong>Giá hiện tại:</strong> <span id="detailCurrentPrice">-</span></p>
-                    <p><strong>Tạo lúc:</strong> <span id="detailCreatedAt">-</span></p>
+    <section class="app-page active" data-page="home">
+        <section class="hero panel">
+            <div class="hero-copy">
+                <p class="eyebrow">Nền tảng đấu giá trực tuyến</p>
+                <h1>Đấu giá đồ sưu tầm minh bạch và chuyên nghiệp</h1>
+                <p class="hero-text">
+                    Nền tảng giúp người bán đăng vật phẩm, người mua đặt giá theo thời gian thực,
+                    và quản trị viên quản lý phiên đấu giá tập trung trên một hệ thống duy nhất.
+                </p>
+                <div class="hero-actions">
+                    <a class="cta-link" href="#marketplace" data-route="marketplace">Vào sàn đấu giá</a>
+                    <a class="cta-link secondary" href="#sell" data-route="sell">Đăng sản phẩm</a>
                 </div>
             </div>
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <p class="stat-label">Vật phẩm đang đấu giá</p>
+                    <p class="stat-value" id="totalItems">0</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Phiên đang mở</p>
+                    <p class="stat-value" id="openItems">0</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Giá cao nhất hiện tại</p>
+                    <p class="stat-value" id="highestPrice">0</p>
+                </article>
+            </div>
+        </section>
 
-            <p class="detail-desc" id="detailDescription">Chọn một vật phẩm để xem mô tả.</p>
+        <section class="panel">
+            <h2>Điểm nổi bật của hệ thống</h2>
+            <p>Thiết kế cho mô hình đấu giá đồ sưu tầm với luồng người dùng rõ ràng và dữ liệu minh bạch.</p>
+            <div class="feature-grid">
+                <article class="feature-item">
+                    <h3>Đặt giá thời gian thực</h3>
+                    <p>Cập nhật giá tức thì, xem lịch sử đặt giá rõ ràng theo từng phiên.</p>
+                </article>
+                <article class="feature-item">
+                    <h3>Người bán chủ động</h3>
+                    <p>Tạo phiên đấu giá nhanh với tên, mô tả, danh mục và ảnh vật phẩm.</p>
+                </article>
+                <article class="feature-item">
+                    <h3>Quản trị tập trung</h3>
+                    <p>Quản lý trạng thái phiên ngay trên bảng điều khiển quản trị.</p>
+                </article>
+            </div>
+        </section>
 
-            <form id="bidForm" class="form-stack">
-                <h3>Đặt giá ngay</h3>
-                <p class="hint" id="bidItemHint">Chọn vật phẩm ở bên trên trước.</p>
+        <section class="panel">
+            <h2>Hành trình sử dụng nền tảng</h2>
+            <div class="journey-grid">
+                <div class="journey-list">
+                    <article class="journey-item">
+                        <span class="journey-step">Bước 1</span>
+                        <h3>Tạo tài khoản người bán hoặc người đấu giá</h3>
+                        <p>Người bán dùng tài khoản để đăng vật phẩm, người mua dùng tài khoản để tham gia đặt giá.</p>
+                    </article>
+                    <article class="journey-item">
+                        <span class="journey-step">Bước 2</span>
+                        <h3>Đăng vật phẩm và mở phiên đấu giá</h3>
+                        <p>Nhập thông tin vật phẩm, giá khởi điểm và ảnh minh họa để tạo phiên.</p>
+                    </article>
+                    <article class="journey-item">
+                        <span class="journey-step">Bước 3</span>
+                        <h3>Theo dõi lịch sử đặt giá</h3>
+                        <p>Mọi lượt đặt giá được lưu theo thời gian, dễ đối chiếu và kiểm tra.</p>
+                    </article>
+                    <article class="journey-item">
+                        <span class="journey-step">Bước 4</span>
+                        <h3>Quản lý trạng thái phiên</h3>
+                        <p>Quản trị viên đóng hoặc mở lại phiên theo quy trình vận hành.</p>
+                    </article>
+                </div>
+                <aside class="info-box">
+                    <h3>Mục tiêu MVP tuần 1</h3>
+                    <p>Hoàn thiện khung hệ thống, dữ liệu mẫu, API cốt lõi và giao diện demo đầy đủ luồng chính.</p>
+                    <ul class="bullet-list">
+                        <li>Luồng đăng nhập và phân quyền cơ bản</li>
+                        <li>Luồng tạo vật phẩm và đặt giá</li>
+                        <li>Luồng quản trị trạng thái phiên</li>
+                        <li>Fallback ảnh khi link ảnh bị lỗi</li>
+                    </ul>
+                </aside>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Câu hỏi thường gặp</h2>
+            <div class="faq-grid">
+                <article class="faq-item">
+                    <h3>Hệ thống có yêu cầu đăng nhập để đặt giá không?</h3>
+                    <p>Có. Bạn cần đăng nhập vai trò Người đấu giá để đặt giá hợp lệ.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Người bán có thể tự đặt giá không?</h3>
+                    <p>Không. Luồng đặt giá được tách riêng cho vai trò Người đấu giá.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Ảnh sản phẩm bị lỗi thì sao?</h3>
+                    <p>Hệ thống tự động thay bằng ảnh dự phòng để giao diện không bị vỡ.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Dữ liệu hiện tại lưu ở đâu?</h3>
+                    <p>Tuần 1 đang chạy in-memory để demo nhanh, tuần sau sẽ tích hợp CSDL thật.</p>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <section class="app-page" data-page="marketplace">
+        <section id="marketplace" class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2>Sàn đấu giá</h2>
+                    <p>Xem danh sách vật phẩm, lọc nhanh, và chọn sản phẩm để đặt giá.</p>
+                </div>
+                <div class="filters">
+                    <label class="input-wrap">
+                        <span>Tìm kiếm</span>
+                        <input type="text" id="searchInput" placeholder="Nhập tên, danh mục, mô tả...">
+                    </label>
+                    <label class="input-wrap">
+                        <span>Sắp xếp</span>
+                        <select id="sortSelect">
+                            <option value="newest">Mới nhất</option>
+                            <option value="priceDesc">Giá cao đến thấp</option>
+                            <option value="priceAsc">Giá thấp đến cao</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div id="itemsGrid" class="items-grid"></div>
+            <div id="marketPager" class="pager" aria-label="Phân trang vật phẩm"></div>
+        </section>
+
+        <section class="split-layout">
+            <article class="panel">
+                <h2>Chi tiết phiên đấu giá</h2>
+
+                <div class="detail-head">
+                    <div class="detail-image-wrap">
+                        <img id="detailImage" data-fallback="true" src="/images/item-placeholder.svg" alt="Ảnh vật phẩm">
+                    </div>
+                    <div class="detail-grid">
+                        <p><strong>Tên vật phẩm:</strong> <span id="detailName">-</span></p>
+                        <p><strong>Danh mục:</strong> <span id="detailCategory">-</span></p>
+                        <p><strong>Trạng thái:</strong> <span id="detailStatus">-</span></p>
+                        <p><strong>Giá khởi điểm:</strong> <span id="detailStartPrice">-</span></p>
+                        <p><strong>Giá hiện tại:</strong> <span id="detailCurrentPrice">-</span></p>
+                        <p><strong>Tạo lúc:</strong> <span id="detailCreatedAt">-</span></p>
+                    </div>
+                </div>
+
+                <p class="detail-desc" id="detailDescription">Chọn một vật phẩm để xem mô tả.</p>
+
+                <form id="bidForm" class="form-stack">
+                    <h3>Đặt giá ngay</h3>
+                    <p class="hint" id="bidItemHint">Chọn vật phẩm ở bên trên trước.</p>
+                    <label class="input-wrap">
+                        <span>Tên người đấu giá</span>
+                        <input type="text" id="bidderName" required placeholder="VD: Mai Tấn Phát">
+                    </label>
+                    <label class="input-wrap">
+                        <span>Số tiền đặt giá (VND)</span>
+                        <input type="number" id="bidAmount" min="1" step="1" required>
+                    </label>
+                    <button type="submit" id="bidSubmitBtn">Đặt giá</button>
+                </form>
+            </article>
+
+            <article class="panel">
+                <h2>Lịch sử đặt giá</h2>
+                <ul id="bidHistory" class="history-list"></ul>
+            </article>
+        </section>
+
+        <section class="panel">
+            <h2>Hướng dẫn đấu giá nhanh</h2>
+            <div class="step-grid">
+                <article class="step-card">
+                    <h3>1. Chọn vật phẩm</h3>
+                    <p>Nhấp vào thẻ sản phẩm để xem đầy đủ chi tiết phiên đấu giá.</p>
+                </article>
+                <article class="step-card">
+                    <h3>2. Kiểm tra trạng thái</h3>
+                    <p>Chỉ có thể đặt giá khi phiên đang ở trạng thái ĐANG MỞ.</p>
+                </article>
+                <article class="step-card">
+                    <h3>3. Nhập giá hợp lệ</h3>
+                    <p>Giá đặt mới phải cao hơn giá hiện tại của phiên.</p>
+                </article>
+                <article class="step-card">
+                    <h3>4. Theo dõi lịch sử</h3>
+                    <p>Mọi lượt đặt giá đều hiển thị theo thứ tự mới nhất.</p>
+                </article>
+            </div>
+        </section>
+    </section>
+
+    <section class="app-page" data-page="sell">
+        <section id="sell" class="panel">
+            <h2>Khu người bán</h2>
+            <p>Đăng vật phẩm mới lên hệ thống và mở phiên đấu giá ngay lập tức.</p>
+
+            <form id="createItemForm" class="form-grid">
                 <label class="input-wrap">
-                    <span>Tên người đấu giá</span>
-                    <input type="text" id="bidderName" required placeholder="VD: Mai Tấn Phát">
+                    <span>Tên vật phẩm</span>
+                    <input type="text" id="itemName" maxlength="100" required>
                 </label>
                 <label class="input-wrap">
-                    <span>Số tiền đặt giá (VND)</span>
-                    <input type="number" id="bidAmount" min="1" step="1" required>
+                    <span>Danh mục</span>
+                    <input type="text" id="itemCategory" maxlength="50" placeholder="Đồng hồ, tiền xu, tranh...">
                 </label>
-                <button type="submit" id="bidSubmitBtn">Đặt giá</button>
+                <label class="input-wrap full">
+                    <span>Mô tả</span>
+                    <textarea id="itemDescription" maxlength="300" rows="4"></textarea>
+                </label>
+                <label class="input-wrap full">
+                    <span>Link ảnh sản phẩm</span>
+                    <input type="url" id="itemImageUrl" maxlength="500" placeholder="https://...">
+                </label>
+                <label class="input-wrap">
+                    <span>Giá khởi điểm (VND)</span>
+                    <input type="number" id="itemStartingPrice" min="1" step="1" required>
+                </label>
+                <div class="full">
+                    <button type="submit">Tạo phiên đấu giá</button>
+                </div>
             </form>
-        </article>
+        </section>
 
-        <article class="panel">
-            <h2>Lịch sử đặt giá</h2>
-            <ul id="bidHistory" class="history-list"></ul>
-        </article>
+        <section class="panel seller-layout">
+            <article>
+                <h2>Quy trình đăng bán chuẩn</h2>
+                <ul class="bullet-list">
+                    <li>Đặt tên vật phẩm cụ thể, dễ tìm kiếm.</li>
+                    <li>Chọn đúng danh mục để tối ưu lọc trên sàn.</li>
+                    <li>Mô tả rõ tình trạng, xuất xứ và phụ kiện đi kèm.</li>
+                    <li>Cung cấp ảnh rõ nét ở góc chụp chính diện.</li>
+                    <li>Thiết lập giá khởi điểm phù hợp thị trường.</li>
+                </ul>
+            </article>
+            <article>
+                <h2>Mẹo tăng chất lượng phiên</h2>
+                <ul class="bullet-list">
+                    <li>Dùng ảnh thật của vật phẩm thay vì ảnh minh họa chung.</li>
+                    <li>Viết mô tả ngắn gọn nhưng đầy đủ thông tin cốt lõi.</li>
+                    <li>Không đặt giá khởi điểm quá cao gây khó tham gia.</li>
+                    <li>Thường xuyên theo dõi giá để phản hồi người mua kịp thời.</li>
+                </ul>
+            </article>
+        </section>
     </section>
 
-    <section id="sell" class="panel">
-        <h2>Khu người bán</h2>
-        <p>Đăng vật phẩm mới lên hệ thống và mở phiên đấu giá ngay lập tức.</p>
-
-        <form id="createItemForm" class="form-grid">
-            <label class="input-wrap">
-                <span>Tên vật phẩm</span>
-                <input type="text" id="itemName" maxlength="100" required>
-            </label>
-            <label class="input-wrap">
-                <span>Danh mục</span>
-                <input type="text" id="itemCategory" maxlength="50" placeholder="Đồng hồ, tiền xu, tranh...">
-            </label>
-            <label class="input-wrap full">
-                <span>Mô tả</span>
-                <textarea id="itemDescription" maxlength="300" rows="4"></textarea>
-            </label>
-            <label class="input-wrap full">
-                <span>Link ảnh sản phẩm</span>
-                <input type="url" id="itemImageUrl" maxlength="500" placeholder="https://...">
-            </label>
-            <label class="input-wrap">
-                <span>Giá khởi điểm (VND)</span>
-                <input type="number" id="itemStartingPrice" min="1" step="1" required>
-            </label>
-            <div class="full">
-                <button type="submit">Tạo phiên đấu giá</button>
+    <section class="app-page" data-page="admin">
+        <section id="admin" class="panel">
+            <div class="panel-header panel-header-admin">
+                <div>
+                    <h2>Trang quản trị</h2>
+                    <p>Quản lý trạng thái phiên đấu giá: theo dõi danh sách và đóng/mở lại phiên.</p>
+                </div>
+                <button id="refreshAdminBtn" type="button" class="ghost-btn">Làm mới dữ liệu</button>
             </div>
-        </form>
-    </section>
 
-    <section id="admin" class="panel">
-        <div class="panel-header panel-header-admin">
-            <div>
-                <h2>Trang quản trị</h2>
-                <p>Quản trị trạng thái phiên đấu giá: theo dõi danh sách và đóng/mở lại phiên.</p>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ảnh</th>
+                        <th>Tên vật phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá hiện tại</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
             </div>
-            <button id="refreshAdminBtn" type="button" class="ghost-btn">Làm mới dữ liệu</button>
-        </div>
+        </section>
 
-        <div class="admin-table-wrap">
-            <table class="admin-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Ảnh</th>
-                    <th>Tên vật phẩm</th>
-                    <th>Danh mục</th>
-                    <th>Giá hiện tại</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-        </div>
+        <section class="panel">
+            <h2>Nguyên tắc vận hành quản trị</h2>
+            <div class="faq-grid">
+                <article class="faq-item">
+                    <h3>Kiểm duyệt dữ liệu</h3>
+                    <p>Theo dõi phiên mới tạo, phát hiện dữ liệu không phù hợp và xử lý kịp thời.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Điều phối trạng thái</h3>
+                    <p>Đóng phiên khi cần dừng giao dịch, mở lại khi đủ điều kiện vận hành.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Giám sát an toàn</h3>
+                    <p>Kiểm tra lịch sử đặt giá và biến động bất thường để giảm rủi ro gian lận.</p>
+                </article>
+                <article class="faq-item">
+                    <h3>Báo cáo định kỳ</h3>
+                    <p>Tổng hợp số liệu phiên mở/đóng, mức giá cao nhất và hiệu suất hệ thống.</p>
+                </article>
+            </div>
+        </section>
     </section>
 </main>
 
@@ -226,15 +381,10 @@
                 <select id="registerRole" required>
                     <option value="BIDDER">Người đấu giá</option>
                     <option value="SELLER">Người bán</option>
-                    <option value="ADMIN">Quản trị viên</option>
                 </select>
             </label>
             <button type="submit">Tạo tài khoản</button>
         </form>
-
-        <p class="auth-note">
-            Tài khoản mẫu: <strong>admin/123456</strong>, <strong>seller1/123456</strong>, <strong>bidder1/123456</strong>
-        </p>
     </div>
 </div>
 

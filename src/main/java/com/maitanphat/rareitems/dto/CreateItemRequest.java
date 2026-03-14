@@ -7,21 +7,21 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public record CreateItemRequest(
-        @NotBlank(message = "Item name is required.")
-        @Size(max = 100, message = "Item name must be at most 100 characters.")
+        @NotBlank(message = "Tên vật phẩm là bắt buộc.")
+        @Size(max = 100, message = "Tên vật phẩm tối đa 100 ký tự.")
         String name,
 
-        @Size(max = 50, message = "Category must be at most 50 characters.")
+        @Size(max = 50, message = "Danh mục tối đa 50 ký tự.")
         String category,
 
-        @Size(max = 300, message = "Description must be at most 300 characters.")
+        @Size(max = 300, message = "Mô tả tối đa 300 ký tự.")
         String description,
 
-        @Size(max = 500, message = "Image URL must be at most 500 characters.")
+        @Size(max = 500, message = "Đường dẫn ảnh tối đa 500 ký tự.")
         String imageUrl,
 
-        @NotNull(message = "Starting price is required.")
-        @DecimalMin(value = "0.01", message = "Starting price must be greater than 0.")
+        @NotNull(message = "Giá khởi điểm là bắt buộc.")
+        @DecimalMin(value = "0.01", message = "Giá khởi điểm phải lớn hơn 0.")
         BigDecimal startingPrice
 ) {
 }

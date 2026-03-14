@@ -6,19 +6,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
-        @NotBlank(message = "Display name is required.")
-        @Size(max = 80, message = "Display name must be at most 80 characters.")
+        @NotBlank(message = "Họ và tên là bắt buộc.")
+        @Size(max = 80, message = "Họ và tên tối đa 80 ký tự.")
         String displayName,
 
-        @NotBlank(message = "Username is required.")
-        @Size(max = 50, message = "Username must be at most 50 characters.")
+        @NotBlank(message = "Tên đăng nhập là bắt buộc.")
+        @Size(max = 50, message = "Tên đăng nhập tối đa 50 ký tự.")
         String username,
 
-        @NotBlank(message = "Password is required.")
-        @Size(min = 6, max = 100, message = "Password must be from 6 to 100 characters.")
+        @NotBlank(message = "Mật khẩu là bắt buộc.")
+        @Size(min = 6, max = 100, message = "Mật khẩu phải từ 6 đến 100 ký tự.")
         String password,
 
-        @NotNull(message = "Role is required.")
+        @NotNull(message = "Vai trò là bắt buộc.")
         UserRole role
 ) {
 }
