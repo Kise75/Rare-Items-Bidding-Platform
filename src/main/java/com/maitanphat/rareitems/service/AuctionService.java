@@ -102,6 +102,17 @@ public class AuctionService {
         return bid;
     }
 
+    public RareItem updateAuctionStatus(Long itemId, AuctionStatus status) {
+        RareItem item = getItemById(itemId);
+        if (item.status() == status) {
+            return item;
+        }
+
+        RareItem updatedItem = item.withStatus(status);
+        itemStore.put(itemId, updatedItem);
+        return updatedItem;
+    }
+
     private void seedDemoData() {
         createItem(new CreateItemRequest(
                 "Vintage Mechanical Watch",

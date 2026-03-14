@@ -1,4 +1,4 @@
-const state = {
+﻿const state = {
     items: [],
     filteredItems: [],
     selectedItemId: null
@@ -22,6 +22,7 @@ function wireEvents() {
     document.getElementById("sortSelect").addEventListener("change", applyFilters);
     document.getElementById("bidForm").addEventListener("submit", placeBid);
     document.getElementById("createItemForm").addEventListener("submit", createItem);
+    document.getElementById("refreshAdminBtn").addEventListener("click", loadItems);
 }
 
 async function loadItems() {
@@ -34,10 +35,14 @@ async function loadItems() {
         state.items = await response.json();
         updateStats();
         applyFilters();
+        renderAdminTable();
 
         if (!state.selectedItemId && state.filteredItems.length > 0) {
             await selectItem(state.filteredItems[0].id);
-        } else if (state.selectedItemId) {
+            return;
+        }
+
+        if (state.selectedItemId) {
             const stillExists = state.items.some((item) => item.id === state.selectedItemId);
             if (!stillExists) {
                 state.selectedItemId = null;
@@ -150,7 +155,11 @@ function renderItemDetail(item) {
     const bidAmountInput = document.getElementById("bidAmount");
     bidAmountInput.min = String(minBid);
     bidAmountInput.placeholder = `Toi thieu ${minBid}`;
-    document.getElementById("bidSubmitBtn").disabled = false;
+
+    document.getElementById("bidSubmitBtn").disabled = item.status !== "OPEN";
+    if (item.status !== "OPEN") {
+        setText("bidItemHint", "Phien da dong. Admin can mo lai de tiep tuc dat gia.");
+    }
 }
 
 function clearItemDetail() {
@@ -176,6 +185,7 @@ async function loadBidHistory() {
         if (!response.ok) {
             throw new Error(await parseError(response));
         }
+
         const bids = await response.json();
         renderBidHistory(bids);
     } catch (error) {
@@ -186,6 +196,7 @@ async function loadBidHistory() {
 
 function renderBidHistory(bids) {
     const history = document.getElementById("bidHistory");
+
     if (!bids || bids.length === 0) {
         history.innerHTML = "<li class='history-empty'>Chua co luot dat gia nao.</li>";
         return;
@@ -205,6 +216,12 @@ async function placeBid(event) {
 
     if (!state.selectedItemId) {
         showToast("Ban can chon item truoc khi dat gia.", true);
+        return;
+    }
+
+    const item = getSelectedItem();
+    if (!item || item.status !== "OPEN") {
+        showToast("Phien da dong. Khong the dat gia.", true);
         return;
     }
 
@@ -265,6 +282,74 @@ async function createItem(event) {
     await loadItems();
     await selectItem(createdItem.id);
     showToast("Da tao phien dau gia moi.", false);
+}
+
+function renderAdminTable() {
+    const tbody = document.getElementById("adminTableBody");
+
+    if (state.items.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' class='items-empty'>Chua co du lieu.</td></tr>";
+        return;
+    }
+
+    const sorted = [...state.items].sort((a, b) => Number(b.id) - Number(a.id));
+
+    tbody.innerHTML = sorted
+        .map((item) => {
+            const isOpen = item.status === "OPEN";
+            const nextStatus = isOpen ? "CLOSED" : "OPEN";
+            const actionClass = isOpen ? "table-btn-close" : "table-btn-open";
+            const actionText = isOpen ? "Dong phien" : "Mo lai";
+            const statusClass = isOpen ? "status-open" : "status-closed";
+
+            return `
+                <tr>
+                    <td>#${item.id}</td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${escapeHtml(item.category || "Other")}</td>
+                    <td>${formatCurrency(item.currentPrice)}</td>
+                    <td><span class="status-pill ${statusClass}">${item.status}</span></td>
+                    <td>
+                        <button
+                            type="button"
+                            class="table-btn ${actionClass}"
+                            data-status-toggle="true"
+                            data-item-id="${item.id}"
+                            data-next-status="${nextStatus}">
+                            ${actionText}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        })
+        .join("");
+
+    tbody.querySelectorAll("[data-status-toggle='true']").forEach((button) => {
+        button.addEventListener("click", async () => {
+            button.disabled = true;
+            const itemId = Number(button.dataset.itemId);
+            const nextStatus = button.dataset.nextStatus;
+            await updateItemStatus(itemId, nextStatus);
+        });
+    });
+}
+
+async function updateItemStatus(itemId, nextStatus) {
+    const response = await fetch(`/api/items/${itemId}/status?value=${nextStatus}`, {
+        method: "PATCH"
+    });
+
+    if (!response.ok) {
+        showToast(await parseError(response), true);
+        return;
+    }
+
+    await loadItems();
+    if (state.selectedItemId === itemId) {
+        await loadBidHistory();
+    }
+
+    showToast(nextStatus === "CLOSED" ? "Da dong phien dau gia." : "Da mo lai phien dau gia.", false);
 }
 
 function updateStats() {

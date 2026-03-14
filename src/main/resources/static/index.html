@@ -6,7 +6,7 @@
     <title>Rare Items Bidding Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
@@ -16,28 +16,27 @@
 <header class="topbar">
     <a class="brand" href="#home">
         <span class="brand-badge">RB</span>
-        <span>RareBid Platform</span>
+        <span>Rare Items Bidding</span>
     </a>
     <nav class="topnav">
         <a href="#marketplace">Marketplace</a>
-        <a href="#sell">Seller</a>
-        <a href="#admin">Admin Mockup</a>
+        <a href="#sell">Seller Studio</a>
+        <a href="#admin">Admin Panel</a>
     </nav>
 </header>
 
 <main class="container">
     <section id="home" class="hero panel">
         <div class="hero-copy">
-            <p class="eyebrow">COS141 - J2EE Final Project</p>
-            <h1>He thong dau gia do suu tam cho nguoi choi do hiem</h1>
+            <p class="eyebrow">Professional Online Auction Platform</p>
+            <h1>Dau gia do suu tam minh bach va chuyen nghiep</h1>
             <p class="hero-text">
-                Ban MVP nay duoc xay dung dua tren y tuong do an cua ban:
-                dau gia minh bach, lich su dat gia ro rang, va luong seller/bidder/admin tach biet.
+                Nen tang giup seller dang vat pham, bidder dat gia theo thoi gian thuc,
+                va admin quan tri phien dau gia tap trung tren mot he thong duy nhat.
             </p>
-            <div class="hero-tags">
-                <span>Live bidding</span>
-                <span>Seller listing</span>
-                <span>Admin dashboard</span>
+            <div class="hero-actions">
+                <a class="cta-link" href="#marketplace">Bat dau dau gia</a>
+                <a class="cta-link secondary" href="#sell">Dang san pham</a>
             </div>
         </div>
         <div class="stats-grid">
@@ -59,8 +58,8 @@
     <section id="marketplace" class="panel">
         <div class="panel-header">
             <div>
-                <h2>Auction marketplace</h2>
-                <p>Xem danh sach vat pham dang dau gia va chon item de dat gia.</p>
+                <h2>Auction Marketplace</h2>
+                <p>Xem danh sach vat pham, loc nhanh, va chon item de dat gia.</p>
             </div>
             <div class="filters">
                 <label class="input-wrap">
@@ -109,14 +108,14 @@
         </article>
 
         <article class="panel">
-            <h2>Bid history</h2>
+            <h2>Bid History</h2>
             <ul id="bidHistory" class="history-list"></ul>
         </article>
     </section>
 
     <section id="sell" class="panel">
-        <h2>Dang san pham dau gia (Seller)</h2>
-        <p>Tao item moi de dua len marketplace. Du lieu se vao API va hien thi ngay.</p>
+        <h2>Seller Studio</h2>
+        <p>Dang vat pham moi len he thong va mo phien dau gia ngay lap tuc.</p>
         <form id="createItemForm" class="form-grid">
             <label class="input-wrap">
                 <span>Ten vat pham</span>
@@ -141,25 +140,28 @@
     </section>
 
     <section id="admin" class="panel">
-        <h2>Admin dashboard (mockup)</h2>
-        <p>Phan nay mo phong cac module tu tai lieu: duyet san pham, thong ke, quan ly nguoi dung.</p>
-        <div class="module-grid">
-            <article class="module-card">
-                <h3>Quan ly user</h3>
-                <p>Lock/unlock tai khoan, phan quyen Admin/Seller/Bidder.</p>
-            </article>
-            <article class="module-card">
-                <h3>Duyet listing</h3>
-                <p>San pham moi vao trang thai cho duyet truoc khi mo dau gia.</p>
-            </article>
-            <article class="module-card">
-                <h3>Thong ke he thong</h3>
-                <p>So phien dau gia, tong giao dich, danh muc hot.</p>
-            </article>
-            <article class="module-card">
-                <h3>Canh bao vi pham</h3>
-                <p>Xu ly report lua dao va theo doi reputation score.</p>
-            </article>
+        <div class="panel-header panel-header-admin">
+            <div>
+                <h2>Admin Panel</h2>
+                <p>Quan tri phien dau gia: theo doi trang thai va dong/mo lai item ngay tren he thong.</p>
+            </div>
+            <button id="refreshAdminBtn" type="button" class="ghost-btn">Lam moi du lieu</button>
+        </div>
+
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ten vat pham</th>
+                    <th>Danh muc</th>
+                    <th>Gia hien tai</th>
+                    <th>Trang thai</th>
+                    <th>Hanh dong</th>
+                </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
         </div>
     </section>
 </main>

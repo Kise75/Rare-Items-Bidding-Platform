@@ -2,6 +2,7 @@ package com.maitanphat.rareitems.controller;
 
 import com.maitanphat.rareitems.dto.CreateItemRequest;
 import com.maitanphat.rareitems.dto.PlaceBidRequest;
+import com.maitanphat.rareitems.model.AuctionStatus;
 import com.maitanphat.rareitems.model.Bid;
 import com.maitanphat.rareitems.model.RareItem;
 import com.maitanphat.rareitems.service.AuctionService;
@@ -11,10 +12,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -57,5 +60,13 @@ public class AuctionController {
     ) {
         Bid placedBid = auctionService.placeBid(itemId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(placedBid);
+    }
+
+    @PatchMapping("/{itemId}/status")
+    public RareItem updateItemStatus(
+            @PathVariable Long itemId,
+            @RequestParam("value") AuctionStatus status
+    ) {
+        return auctionService.updateAuctionStatus(itemId, status);
     }
 }

@@ -25,4 +25,17 @@ public record RareItem(
                 createdAt
         );
     }
+
+    public RareItem withStatus(AuctionStatus updatedStatus) {
+        return new RareItem(
+                id,
+                name,
+                category,
+                description,
+                startingPrice,
+                currentPrice,
+                updatedStatus,
+                createdAt
+        );
+    }
 }
