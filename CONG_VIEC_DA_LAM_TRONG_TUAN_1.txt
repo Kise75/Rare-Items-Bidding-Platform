@@ -1,0 +1,51 @@
+﻿CONG VIEC DA LAM TRONG TUAN 1
+De tai: He thong Dau gia Do suu tam (Rare Items Bidding Platform)
+Sinh vien: Mai Tan Phat
+MSSV: 2280602300
+Mon hoc: COS141 - Application Development using J2EE
+Thoi gian bao cao: 08/03/2026 - 14/03/2026
+
+1) Muc tieu trong tuan
+- Hoan thien bo khung backend cho de tai.
+- Tao duoc phien ban web co giao dien de demo thay vi chi tra ve text.
+- Dam bao source code duoc commit len GitHub repo theo yeu cau.
+
+2) Cong viec da thuc hien
+- Khoi tao va chuan hoa cau truc du an Spring Boot.
+- Xay dung API cho module dau gia:
+  + GET /api/items
+  + GET /api/items/{itemId}
+  + POST /api/items
+  + GET /api/items/{itemId}/bids
+  + POST /api/items/{itemId}/bids
+- Viet business logic cho phien dau gia:
+  + Tao vat pham dau gia
+  + Dat gia moi lon hon gia hien tai
+  + Luu lich su dat gia
+- Bo sung validation du lieu va xu ly loi tap trung (400/404/500).
+- Hoan thien giao dien web MVP chay tai /welcome:
+  + Trang tong quan Home
+  + Danh sach vat pham dau gia (marketplace)
+  + Chi tiet vat pham va lich su bid
+  + Form dat gia
+  + Form dang san pham moi
+  + Khu vuc Admin Dashboard (mockup)
+- Tach endpoint text sang /api/welcome de giu API phuc vu kiem tra nhanh.
+- Cap nhat README mo ta cach chay va cac endpoint hien co.
+- Don dep cac file khong can thiet trong repo theo tien do.
+
+3) Ket qua dat duoc
+- Du an da chay duoc tren localhost voi giao dien web va API hoat dong dong bo.
+- Co the tao item moi, xem danh sach item, dat gia, va theo doi bid history ngay tren giao dien.
+- Nguoi dung co the demo truc tiep theo luong co ban cua seller va bidder.
+
+4) Source code moi da commit len GitHub repo
+- Commit: 721d553 - feat: week 1 progress - auction api skeleton and report
+- Commit: eba59ed - feat: add mvp web ui for rare items bidding
+- Repo: https://github.com/Kise75/Rare-Items-Bidding-Platform
+
+5) Ke hoach tuan tiep theo
+- Tich hop CSDL MySQL thay cho bo nho tam.
+- Thiet ke Entity/Repository cho User, Item, Bid.
+- Bat dau module dang ky/dang nhap va phan quyen co ban.
+- Nang cap giao dien theo cac man hinh mo ta trong de cuong (chi tiet san pham, profile, vi, quan tri).
