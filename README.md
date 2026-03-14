@@ -6,7 +6,8 @@ Rare Items Bidding Platform (COS141 - Application Development using J2EE)
 
 Implemented a basic auction API skeleton with Spring Boot:
 
-- `GET /welcome`: simple welcome endpoint
+- `GET /welcome`: web UI page for the project MVP
+- `GET /api/welcome`: simple welcome endpoint (text)
 - `GET /api/items`: list all auction items
 - `GET /api/items/{itemId}`: view item details
 - `POST /api/items`: create a new item
@@ -17,4 +18,5 @@ Notes:
 
 - Current implementation uses in-memory storage for fast iteration in week 1.
 - Input validation and common error responses are included.
+- Frontend MVP is available at `/welcome` and connected directly to the API above.
 - A week-1 report file is available at `BAO_CAO_TIEN_DO_1.md`.

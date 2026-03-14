@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rare Items Bidding Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="bg-shape bg-shape-a"></div>
+<div class="bg-shape bg-shape-b"></div>
+
+<header class="topbar">
+    <a class="brand" href="#home">
+        <span class="brand-badge">RB</span>
+        <span>RareBid Platform</span>
+    </a>
+    <nav class="topnav">
+        <a href="#marketplace">Marketplace</a>
+        <a href="#sell">Seller</a>
+        <a href="#admin">Admin Mockup</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section id="home" class="hero panel">
+        <div class="hero-copy">
+            <p class="eyebrow">COS141 - J2EE Final Project</p>
+            <h1>He thong dau gia do suu tam cho nguoi choi do hiem</h1>
+            <p class="hero-text">
+                Ban MVP nay duoc xay dung dua tren y tuong do an cua ban:
+                dau gia minh bach, lich su dat gia ro rang, va luong seller/bidder/admin tach biet.
+            </p>
+            <div class="hero-tags">
+                <span>Live bidding</span>
+                <span>Seller listing</span>
+                <span>Admin dashboard</span>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <article class="stat-card">
+                <p class="stat-label">Vat pham dang dau gia</p>
+                <p class="stat-value" id="totalItems">0</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Phien dang mo</p>
+                <p class="stat-value" id="openItems">0</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Gia cao nhat hien tai</p>
+                <p class="stat-value" id="highestPrice">0</p>
+            </article>
+        </div>
+    </section>
+
+    <section id="marketplace" class="panel">
+        <div class="panel-header">
+            <div>
+                <h2>Auction marketplace</h2>
+                <p>Xem danh sach vat pham dang dau gia va chon item de dat gia.</p>
+            </div>
+            <div class="filters">
+                <label class="input-wrap">
+                    <span>Tim kiem</span>
+                    <input type="text" id="searchInput" placeholder="Nhap ten, danh muc, mo ta...">
+                </label>
+                <label class="input-wrap">
+                    <span>Sap xep</span>
+                    <select id="sortSelect">
+                        <option value="newest">Moi nhat</option>
+                        <option value="priceDesc">Gia cao den thap</option>
+                        <option value="priceAsc">Gia thap den cao</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+        <div id="itemsGrid" class="items-grid"></div>
+    </section>
+
+    <section class="split-layout">
+        <article class="panel">
+            <h2>Chi tiet phien dau gia</h2>
+            <div class="detail-grid">
+                <p><strong>Ten vat pham:</strong> <span id="detailName">-</span></p>
+                <p><strong>Danh muc:</strong> <span id="detailCategory">-</span></p>
+                <p><strong>Trang thai:</strong> <span id="detailStatus">-</span></p>
+                <p><strong>Gia khoi diem:</strong> <span id="detailStartPrice">-</span></p>
+                <p><strong>Gia hien tai:</strong> <span id="detailCurrentPrice">-</span></p>
+                <p><strong>Tao luc:</strong> <span id="detailCreatedAt">-</span></p>
+            </div>
+            <p class="detail-desc" id="detailDescription">Chon mot vat pham de xem mo ta.</p>
+
+            <form id="bidForm" class="form-stack">
+                <h3>Dat gia ngay</h3>
+                <p class="hint" id="bidItemHint">Chon item o ben tren truoc.</p>
+                <label class="input-wrap">
+                    <span>Ten nguoi dau gia</span>
+                    <input type="text" id="bidderName" required placeholder="VD: Mai Tan Phat">
+                </label>
+                <label class="input-wrap">
+                    <span>So tien dat gia (VND)</span>
+                    <input type="number" id="bidAmount" min="1" step="1" required>
+                </label>
+                <button type="submit" id="bidSubmitBtn">Dat gia</button>
+            </form>
+        </article>
+
+        <article class="panel">
+            <h2>Bid history</h2>
+            <ul id="bidHistory" class="history-list"></ul>
+        </article>
+    </section>
+
+    <section id="sell" class="panel">
+        <h2>Dang san pham dau gia (Seller)</h2>
+        <p>Tao item moi de dua len marketplace. Du lieu se vao API va hien thi ngay.</p>
+        <form id="createItemForm" class="form-grid">
+            <label class="input-wrap">
+                <span>Ten vat pham</span>
+                <input type="text" id="itemName" maxlength="100" required>
+            </label>
+            <label class="input-wrap">
+                <span>Danh muc</span>
+                <input type="text" id="itemCategory" maxlength="50" placeholder="Watch, Coin, Art...">
+            </label>
+            <label class="input-wrap full">
+                <span>Mo ta</span>
+                <textarea id="itemDescription" maxlength="300" rows="4"></textarea>
+            </label>
+            <label class="input-wrap">
+                <span>Gia khoi diem (VND)</span>
+                <input type="number" id="itemStartingPrice" min="1" step="1" required>
+            </label>
+            <div class="full">
+                <button type="submit">Tao phien dau gia</button>
+            </div>
+        </form>
+    </section>
+
+    <section id="admin" class="panel">
+        <h2>Admin dashboard (mockup)</h2>
+        <p>Phan nay mo phong cac module tu tai lieu: duyet san pham, thong ke, quan ly nguoi dung.</p>
+        <div class="module-grid">
+            <article class="module-card">
+                <h3>Quan ly user</h3>
+                <p>Lock/unlock tai khoan, phan quyen Admin/Seller/Bidder.</p>
+            </article>
+            <article class="module-card">
+                <h3>Duyet listing</h3>
+                <p>San pham moi vao trang thai cho duyet truoc khi mo dau gia.</p>
+            </article>
+            <article class="module-card">
+                <h3>Thong ke he thong</h3>
+                <p>So phien dau gia, tong giao dich, danh muc hot.</p>
+            </article>
+            <article class="module-card">
+                <h3>Canh bao vi pham</h3>
+                <p>Xu ly report lua dao va theo doi reputation score.</p>
+            </article>
+        </div>
+    </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/js/app.js" defer></script>
+</body>
+</html>
